@@ -15,6 +15,18 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('people.index')" :active="request()->routeIs('people.*')">
+                        {{ __('Pessoas / Empresas') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('receivables.index')" :active="request()->routeIs('receivables.*')">
+                        {{ __('Contas a Receber') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('payables.index')" :active="request()->routeIs('payables.*')">
+                        {{ __('Contas a Pagar') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                        {{ __('Relatórios') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -69,6 +81,18 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('people.index')" :active="request()->routeIs('people.*')">
+                {{ __('Pessoas / Empresas') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('receivables.index')" :active="request()->routeIs('receivables.*')">
+                {{ __('Contas a Receber') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('payables.index')" :active="request()->routeIs('payables.*')">
+                {{ __('Contas a Pagar') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                {{ __('Relatórios') }}
             </x-responsive-nav-link>
         </div>
 

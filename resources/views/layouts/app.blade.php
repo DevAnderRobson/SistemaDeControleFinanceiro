@@ -29,8 +29,24 @@
 
             <!-- Page Content -->
             <main>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                    @if (session('success'))
+                        <div class="mb-4 p-4 text-sm text-green-800 rounded-lg bg-green-50 border border-green-200" role="alert">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="mb-4 p-4 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200" role="alert">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+                </div>
+
                 {{ $slot }}
             </main>
         </div>
+
+        @stack('scripts')
     </body>
 </html>
