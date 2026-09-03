@@ -1,58 +1,75 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Controle Financeiro - Desafio Técnico
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Projeto desenvolvido para o teste técnico de Laravel. É um sistema simples de controle de contas a pagar e contas a receber, com cadastro de pessoas/empresas, dashboard com totais e tela de relatórios.
 
-## About Laravel
+## Como rodar o projeto
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Eu configurei usando o Docker com Laravel Sail:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+1. Copiar o `.env`:
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cp .env.example .env
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+2. Instalar as dependências do Composer:
+Se você ainda não tiver a pasta vendor baixada (primeira vez clonando), precisa rodar o composer antes. Se o seu PHP local for diferente do PHP 8.5 do projeto, use `--ignore-platform-reqs`:
+```bash
+composer install --ignore-platform-reqs
+```
+*(ou se não tiver composer/php na máquina, dá pra rodar direto pela imagem docker do sail):*
+```bash
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    laravelsail/php85-composer:latest \
+    composer install --ignore-platform-reqs
+```
 
-## Contributing
+3. Subir os containers:
+```bash
+./vendor/bin/sail up -d
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. Gerar a key e rodar as migrations com os dados de teste:
+```bash
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate --seed
+```
 
-## Code of Conduct
+5. Compilar os assets:
+```bash
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run build
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Depois é só acessar no navegador: `http://localhost`
 
-## Security Vulnerabilities
+*(Se preferir rodar sem docker, dá pra rodar direto com `php artisan serve` e configurando o mysql no .env normal).*
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## Usuário de teste
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+O seeder já cria um usuário pronto pra testar e alguns clientes, fornecedores e lançamentos:
+
+- **E-mail:** `admin@financeiro.local`
+- **Senha:** `senha123`
+
+---
+
+## O que tem no sistema
+
+- **Pessoas/Empresas:** cadastro de clientes e fornecedores. Coloquei uma validação de CPF e CNPJ pra não deixar passar documento errado.
+- **Contas a Pagar / Contas a Receber:** listagem e cadastro com vencimento e valor. Tem botão pra dar baixa (informando a data do pagamento/recebimento) e pra cancelar o título.
+- **Dashboard:** tela inicial mostrando os totalizadores (a receber, recebido, a pagar, pago, saldos previsto e realizado) e coloquei um gráfico simples de barras usando Chart.js mostrando o fluxo dos últimos meses.
+- **Relatório:** filtros por período de vencimento, pessoa, tipo e status, com os totalizadores em cima e um botão pra exportar os dados em CSV (dá pra abrir no Excel).
+- **Rotina de vencidos:** criei um comando `php artisan finance:check-overdue` que busca o que tá pendente com data de vencimento anterior a hoje e troca o status pra vencido. Deixei agendado no `routes/console.php`.
+
+---
+
+## Algumas decisões que tomei
+
+- Usei uma tabela só (`financial_entries`) com uma coluna `type` (payable/receivable) em vez de criar duas tabelas separadas. Achei mais fácil e organizado pra puxar os totais do dashboard e fazer a tela de relatório sem precisar ficar fazendo union de tabelas.
+- Validação dos formulários fiz em Form Requests separados pra não deixar os controllers cheios de regra.
+- O front fiz com o Blade e Tailwind que já vem no Breeze mesmo, tentando deixar o mais limpo e direto possível.
